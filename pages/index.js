@@ -16,7 +16,6 @@ import axios from "axios";
 import { truncate } from "./service/service";
 const img1 =
     "https://img.freepik.com/free-vector/gradient-nft-concept-illustrated_52683-61452.jpg?w=1380&t=st=1687340931~exp=1687341531~hmac=eafb19a5bad33a80cc53b5a8ac605e515e54b5f980c87224cb5310f087aaf677";
-
 export default function Home() {
     const router = useRouter();
     const [nfts, setNfts] = useState([]);
@@ -28,6 +27,7 @@ export default function Home() {
 
     async function loadNFTs() {
         try {
+            
             //lấy tài khoàn đang kết nối metamask
             const provider1 = new ethers.providers.Web3Provider(window.ethereum);
             const accounts = await provider1.listAccounts();
@@ -65,9 +65,10 @@ export default function Home() {
             }));
             setNfts(items);
             setLoadingState('loaded');
+
         } catch (error) {
             console.log("Load failed , Server dropped");
-            // console.log(error);
+            console.log(error);
         }
 
 
@@ -215,12 +216,12 @@ export default function Home() {
                     <h4
                         className="text-white text-3xl font-bold uppercase
           opacity-70">
-                        Latest Transaction
+                        Transaction
                     </h4>
 
-                    <Transaction nft={1} />
+                    {/* <Transaction nft={1} />
                     <Transaction nft={2} />
-                    <Transaction nft={2} />
+                    <Transaction nft={2} /> */}
 
                     <div className="text-center my-5">
                         <button className="shadow-xl shadow-blue-400 text-white 

@@ -103,9 +103,7 @@ function detail() {
     const contract = new ethers.Contract(nftMarketAddress, Market.abi, signer);
     //chuyển đổi giá trị nft.price sang đơn vị wei bằng cách sử dụng ethers.utils.parseUnits():
     const price = ethers.utils.parseUnits(nft.price, 'ether');
-    // console.log(price.toNumber());
-    // console.log(nft.tokenId);
-    // console.log(nft.price.toString());
+ 
     let listingPrice = await contract.getListingPrice();
         listingPrice = listingPrice.toString();
     const transaction = await contract.reSellToken(nftAddress, nft.tokenId,price,
@@ -114,20 +112,27 @@ function detail() {
       });
     await transaction.wait();
     console.log("Success Resale");
+    router.push('/');
     } catch (error) {
         console.log("Fail");
     }
   }
   async function cancelSale(nft) {
     try {
-      await buyNFT(nft);
-      await reSale(nft);
-      await buyNFT(nft);
-      // console.log(nft.tokenId);
-      // console.log(nft.itemId);
+      // buyNFT(nft);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      //Conenct smart contract
+      const contract = new ethers.Contract(nftMarketAddress, Market.abi, signer);
+      //chuyển đổi giá trị nft.price sang đơn vị wei bằng cách sử dụng ethers.utils.parseUnits():
+      const price = ethers.utils.parseUnits(nft.price.toString(), 'ether');
+    const transaction = await contract.cancelSaleToken(nftAddress, nft.itemId,
+      {
+        value: price
+      });
+    await transaction.wait();
       console.log("Cancel Successfully!");
-      // router.reload();
-      loadNFTs();
+      router.push('/');
     } catch (error) {
       console.log("fail!");
       console.log(error);

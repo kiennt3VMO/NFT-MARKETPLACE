@@ -1,7 +1,5 @@
 import {
     apikey,
-    apiSecret,
-    gateWay,
     ipfsGateWay,
     readHeader,
     getHeader,
@@ -35,6 +33,7 @@ import {
         console.error("Error pinning JSON to IPFS:", error);
     }
   }
+
   async function sendFileToIPFS(file) {
     const formData = new FormData();
     const url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
@@ -48,7 +47,7 @@ import {
         headers: {
             "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
             pinata_api_key: apikey,
-            pinata_secret_api_key: apiSecret,
+            pinata_secret_api_key:  process.env.API_KEY,
             Accept : "text/plain",
   
         }

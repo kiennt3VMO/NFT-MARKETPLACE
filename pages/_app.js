@@ -83,7 +83,7 @@ export default function App({ Component, pageProps }) {
           <button className="shadow-xl shadow-blue-400 text-white 
       bg-[#44b8e6] hover:bg-[#258dd3] md:text-xs p-3 rounded-full"
       onClick={ConnectMetamask}>
-            {truncate(signer, 4, 4, 11)}
+            {truncate(signer, 5,3, 11)}
           </button>
         )
 

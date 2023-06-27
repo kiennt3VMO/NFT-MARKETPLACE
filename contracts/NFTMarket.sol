@@ -13,7 +13,7 @@ contract NFTMarket is ReentrancyGuard {
     //Theo dõi số lượng item của market đc tạo từ token tạo ra của user và đc bán
     Counters.Counter private _itemIds;
     Counters.Counter private _itemSold;
-
+    Counters.Counter private _itemTransaction;
     // owner of smart contract
     address payable owner;
 
@@ -37,9 +37,19 @@ contract NFTMarket is ReentrancyGuard {
         bool sold;
     }
 
+    struct Transaction {
+        uint256 itemId;
+        address owner;
+        uint256 cost;
+        string title;
+        string description;
+        uint256 timestamp;
+    }
+
     // Use mapping to manage NFT  and Data of NFT
     mapping(uint256 => MarketItem) private idMarketItem;
 
+    mapping(uint256 => Transaction) private transactions;
     //Emit when a item is sold
     //Create a place for variable have indexed for easy to find when log event
     event idMarketItemCreated(
@@ -88,6 +98,7 @@ contract NFTMarket is ReentrancyGuard {
             price,
             false // false which mean just create and no list on market to sold
         );
+
         //Transfer owner ship of nft to the market
         IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
@@ -99,6 +110,21 @@ contract NFTMarket is ReentrancyGuard {
             address(this), // A empty address(no owner yet)
             price,
             false
+        );
+
+        _itemTransaction.increment();
+        uint256 itemTransaction = _itemTransaction.current();
+
+        string memory title = "Create Token";
+        string
+            memory description = "Create new token and listing to the marketplace";
+        transactions[itemTransaction] = Transaction(
+            itemTransaction,
+            msg.sender,
+            msg.value,
+            title,
+            description,
+            block.timestamp
         );
     }
 
@@ -127,27 +153,59 @@ contract NFTMarket is ReentrancyGuard {
             address(this),
             idMarketItem[itemId].tokenId
         );
+
+        _itemTransaction.increment();
+        uint256 itemTransaction = _itemTransaction.current();
+
+        string memory title = "Resale Token";
+        string memory description = "Sale a token after we buy this";
+        transactions[itemTransaction] = Transaction(
+            itemTransaction,
+            msg.sender,
+            msg.value,
+            title,
+            description,
+            block.timestamp
+        );
     }
 
     function cancelSaleToken(
         address nftContract,
         uint256 itemId
-    ) public payable {
-         uint256 price = idMarketItem[itemId].price;
+    ) public payable nonReentrant {
+        uint256 price = idMarketItem[itemId].price;
         uint256 tokenId = idMarketItem[itemId].tokenId;
         require(
-            msg.value >= listingPrice ,
-            "Price must be equal to listing price"
+            msg.value == price,
+            "Please submit the asking price in order to compelete the market"
         );
         //Seller get the money that sell nft
+        idMarketItem[itemId].seller.transfer(msg.value);
+        //Transfer owner ship of nft to the market
         IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
 
         //Owner of nft is the buyer
-        idMarketItem[itemId].sold = true;
-        idMarketItem[itemId].price = price;
         idMarketItem[itemId].owner = payable(msg.sender);
-        idMarketItem[itemId].seller = payable(address(this));
+        idMarketItem[itemId].seller = payable(msg.sender);
+        idMarketItem[itemId].sold = false;
+
+        _itemSold.increment();
+
         payable(owner).transfer(listingPrice);
+
+        _itemTransaction.increment();
+        uint256 itemTransaction = _itemTransaction.current();
+
+        string memory title = "Cancel Sale Token";
+        string memory description = "Cancel token that listing on marketplace";
+        transactions[itemTransaction] = Transaction(
+            itemTransaction,
+            msg.sender,
+            listingPrice,
+            title,
+            description,
+            block.timestamp
+        );
     }
 
     //When user want to buy a nft , user call this function and tranfe amount of ether/wei
@@ -168,11 +226,26 @@ contract NFTMarket is ReentrancyGuard {
 
         //Owner of nft is the buyer
         idMarketItem[itemId].owner = payable(msg.sender);
+        idMarketItem[itemId].seller = payable(msg.sender);
         idMarketItem[itemId].sold = true;
 
         _itemSold.increment();
 
         payable(owner).transfer(listingPrice);
+
+        _itemTransaction.increment();
+        uint256 itemTransaction = _itemTransaction.current();
+
+        string memory title = "Buy Token";
+        string memory description = "Owned token by buying token";
+        transactions[itemTransaction] = Transaction(
+            itemTransaction,
+            msg.sender,
+            msg.value,
+            title,
+            description,
+            block.timestamp
+        );
     }
 
     //List of item on market that unsold
@@ -190,6 +263,20 @@ contract NFTMarket is ReentrancyGuard {
                 items[currentIndex] = currentItem;
                 currentIndex += 1;
             }
+        }
+        return items;
+    }
+
+    function fetchAllTransaction() public view returns (Transaction[] memory) {
+        uint256 itemCount = _itemTransaction.current();
+        uint256 currentIndex = 0;
+        Transaction[] memory items = new Transaction[](itemCount);
+        for (uint256 i = 0; i < itemCount; i++) {
+            //If nft is equal empty address that mean nft unsold
+            uint256 currentId = i + 1;
+            Transaction memory currentItem = transactions[currentId];
+            items[currentIndex] = currentItem;
+            currentIndex += 1;
         }
         return items;
     }

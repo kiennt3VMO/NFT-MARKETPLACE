@@ -9,12 +9,15 @@ import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json'
 import axios from "axios";
 import { ethers } from 'ethers'
+import Transaction from "./components/Transaction";
 function statics() {
     const [nfts, setNfts] = useState([])
+    const [transaction, setTrans] = useState([])
     const [sold, setSold] = useState([])
     const [loadingState, setLoadingState] = useState('not-loaded')
     useEffect(() => {
         loadNFTs()
+        loadTrans()
     }, [])
     async function loadNFTs() {
         try {
@@ -61,6 +64,39 @@ function statics() {
             console.log("Not connected to metamask");
         }
     }
+    async function loadTrans() {
+        // try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+
+            const marketContract = new ethers.Contract(nftMarketAddress, Market.abi, signer)
+            const data = await marketContract.fetchAllTransaction()
+
+            const items = await Promise.all(data.map(async i => {
+                const date = new Date(i.timestamp * 1000); // Để chuyển đổi timestamp từ giây thành mili-giây, nhân với 1000
+                    const currentDate = date.toISOString(); 
+                let cost = ethers.utils.formatUnits(i.cost.toString(), 'ether')
+                let item = {
+                    itemId : i.itemId.toNumber(),
+                    owner : i.owner,
+                    cost: cost,
+                    title: i.title,
+                    description: i.description,
+                    timestamp: currentDate,
+                }
+                return item;
+            }))
+            /* create a filtered array of items that have been sold */
+            // console.log(items);
+
+            console.log(items);
+            // console.log(items.length);
+            setTrans(items);
+            console.log("Load Transaction");
+        // } catch (error) {
+        //     console.log("Not load transaction");
+        // }
+    }
     return (
         <div
             className="w-4/5 
@@ -72,7 +108,7 @@ function statics() {
                 <h4
                     className="text-white text-3xl font-bold uppercase
     opacity-70" >
-                    NFT Saled
+                    NFT Created
                 </h4>
                 {/* NFT Section */}
                 {
@@ -151,6 +187,41 @@ function statics() {
                     )
                 }
 
+            </div>
+
+            <div>
+                <h4
+                    className="text-white text-3xl font-bold uppercase
+    opacity-70" >
+                    Transaction
+                </h4>
+
+                <div
+                    className="grid grid-col
+                            gap-6 md:gap-4 lg:gap-3 py-2.5">
+                  
+                   {
+                     transaction.length > 0 ? (
+                        transaction.map((tran, i) => (
+                            <Transaction key={i} tran={tran} />
+                         ))
+                     ) : (
+                        <h6
+                        className="text-white text-2xl font-mono
+                        opacity-70 text-center"
+                    >
+                        No Transaction 
+                    </h6>
+                     )
+                  
+                   }
+                    <div className="text-center my-5 ">
+                        <button className="shadow-xl shadow-blue-400 text-white 
+    bg-[#44b8e6] hover:bg-[#258dd3] md:text-xs p-2 rounded-full">
+                            Load more
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     )
