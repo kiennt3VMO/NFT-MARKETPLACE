@@ -53,7 +53,7 @@ describe("NFTMarket", function () {
         // Arrange
         // Chuẩn bị dữ liệu cần thiết hoặc thiết lập môi trường
         let listing = ethToWeh(0.001);
-
+        expect(listing).to.be.above(0)
         // Act
         // Thực thi các function trên smartcontract
         const result = await nftMarketContract.connect(owner).getListingPrice();
@@ -68,16 +68,17 @@ describe("NFTMarket", function () {
         // console.log(owner.address);
     });
 
-    // // //Create token 
     let tokenId = 1;
-    it("Should return the correct tokenId when create a token", async function () {
-        let metadataURI = "ipfs://QmdnSBLxPTGKRGzwnFuXieVseP77jKfSX4k5w6etjixpYB";
+    let id;
+    // createToken  createMarketItem
+    it(`Should be create and listing NFT on Market `, async function () {
 
+        let metadataURI = "ipfs://QmdnSBLxPTGKRGzwnFuXieVseP77jKfSX4k5w6etjixpYB";
+        expect(metadataURI).to.not.be.empty;
+
+        
         const transaction = await nftContract.connect(owner).createToken(metadataURI);
         const receipt = await transaction.wait();
-        console.log(receipt.to);
-        console.log(receipt.from);
-
         // Get the Transfer event
         const transferEvent = receipt.logs
             .map((log) => nftContract.interface.parseLog(log))
@@ -85,18 +86,12 @@ describe("NFTMarket", function () {
 
         // Extract the newItemId from the event
         const newItemId = transferEvent.args[2];
-
         // Using Number constructor
         const parsedValue = Number(newItemId);
         id = parsedValue;
         expect(parsedValue).to.equal(tokenId);
-        console.log(id);
-        // console.log(owner.address);
-        // console.log(buyer.address);
-    });
+        // console.log(id);
 
-    // createMarketItem
-    it(`Should be  listing NFT on Market `, async function () {
         //Chuẩn bị dữ liệu
         let price = ethToWeh(0.05);
         let listPrice = ethToWeh(0.001);
@@ -106,7 +101,7 @@ describe("NFTMarket", function () {
         expect(listPrice).to.equal(listingPrice);
 
         //buyer bán item
-        const transaction = await nftMarketContract.connect(owner).createMarketItem(
+        const transaction1 = await nftMarketContract.connect(owner).createMarketItem(
             nftContractAddress,
             id,
             price.toString(),
@@ -114,14 +109,13 @@ describe("NFTMarket", function () {
                 value: listingPrice
             }
         );
-        const receipt = await transaction.wait();
-        console.log(receipt.to);
-        console.log(receipt.from);
+        const receipt1 = await transaction1.wait();
+        // console.log(receipt.to);
 
-
+        tokenId+=1;
     });
 
-    //createMarketSale
+    // //createMarketSale
     it(`Should be buy NFT from Market `, async function () {
 
         let priceNft = ethToWeh(0.05);
@@ -139,20 +133,20 @@ describe("NFTMarket", function () {
             }
         );
         const receipt = await transaction.wait();
-        console.log(receipt.to);
-        console.log(receipt.from);
+        // console.log(receipt.to);
+        // console.log(receipt.from);
 
 
     });
 
-    //reSellToken
+    // //reSellToken
     it(`Should be repurchase NFT to Market after buy `, async function () {
 
         let price = ethToWeh(0.05);
         let listPrice = ethToWeh(0.001);
 
         expect(listPrice).to.equal(listingPrice);
-
+        expect(price).to.be.above(0);
         const transaction = await nftMarketContract.connect(owner).reSellToken(
             nftContractAddress,
             id,
@@ -166,14 +160,15 @@ describe("NFTMarket", function () {
         console.log(receipt.from);
     });
 
-    //reSellToken
+    //cancelSellToken
     it(`Should be cancel purchase NFT to Market after buy `, async function () {
 
+        let priceNft = ethToWeh(0.05);
         let price = ethToWeh(0.05);
         let listPrice = ethToWeh(0.001);
 
+        expect(price).to.be.equal(priceNft)
         expect(listPrice).to.equal(listingPrice);
-
         const transaction = await nftMarketContract.connect(owner).cancelSaleToken(
             nftContractAddress,
             id,
@@ -186,28 +181,44 @@ describe("NFTMarket", function () {
         console.log(receipt.from);
     });
 
+    // //Fetch item transaction
     it(`Should be fetch item `, async function () {
-        let price = ethToWeh(0.05);
         let metadataURI = "ipfs://QmdnSBLxPTGKRGzwnFuXieVseP77jKfSX4k5w6etjixpYB";
+        expect(metadataURI).to.not.be.empty;
+
+        
         const transaction = await nftContract.connect(owner).createToken(metadataURI);
         const receipt = await transaction.wait();
         // Get the Transfer event
         const transferEvent = receipt.logs
             .map((log) => nftContract.interface.parseLog(log))
             .find((parsedLog) => parsedLog.name === "Transfer");
+
         // Extract the newItemId from the event
         const newItemId = transferEvent.args[2];
         // Using Number constructor
         const parsedValue = Number(newItemId);
+        id = parsedValue;
+        expect(parsedValue).to.equal(tokenId);
+        // console.log(id);
+
+        //Chuẩn bị dữ liệu
+        let price = ethToWeh(0.05);
+        let listPrice = ethToWeh(0.001);
+
+        expect(price).to.be.above(0)
+        expect(listPrice).to.equal(listingPrice);
+
         //buyer bán item
         const transaction1 = await nftMarketContract.connect(owner).createMarketItem(
             nftContractAddress,
-            parsedValue,
+            id,
             price.toString(),
             {
                 value: listingPrice
             }
         );
+        const receipt1 = await transaction1.wait();
 
 
         // const transaction = await nftMarketContract.connect(owner).fetchMarketItem();
