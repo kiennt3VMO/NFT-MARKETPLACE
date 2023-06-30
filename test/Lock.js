@@ -11,11 +11,10 @@ function ethToWeh(wei) {
 }
 describe("NFTMarket", function () {
   it("Should create and execute market sales", async function () {
-    const Market = await ethers.getContractFactory("NFTMarket");
-    const market = await Market.deploy();
-    await market.deploy(); //deploy the NFTMarket contract
-    const marketAddress = await market.getAddress();
-    console.log("1 " , marketAddress);
+       const MARKET = await ethers.getContractFactory("NFTMarket");
+        nftMarketContract = await MARKET.deploy();
+        const marketAddress = await nftMarketContract.getAddress();
+        console.log(marketAddress);
 
     // const NFT = await ethers.getContractFactory("NFT");
     // const nft = await NFT.deploy(marketAddress);

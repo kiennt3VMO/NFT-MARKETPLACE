@@ -29,6 +29,7 @@ const create = () => {
             const cid = receipt.replace('ipfs://', '');
             const tokenUriWithGateway = ipfsGateway + cid;
            //  console.log(tokenUriWithGateway.toString());
+           console.log("Wait a minute to create metadateuri");
             const meta = await axios.get(tokenUriWithGateway);
             setFileUrl(meta.data.image.toString());
            //  console.log(fileUrl.toString());
@@ -37,6 +38,7 @@ const create = () => {
           //  console.log(formInput.price);
     
             console.log("Load Done!");
+            console.log("Click CREATE to create a new token");
           }else{
             console.log("Field is empty");
           }
@@ -49,25 +51,30 @@ const create = () => {
    //2. Create item for sale
    async function createItem() {
        try {
-           const provider = new ethers.providers.Web3Provider(window.ethereum);
-           const signer = provider.getSigner();
-           //Contract NFT
-           let nft = new ethers.Contract(nftAddress, NFT.abi, signer);
-          //  console.log(cid);
-           let transaction = await nft.createToken(cid);
-           let tx = await transaction.wait();
-           let tokenId = tx.events[0].args[2].toNumber();
-           const price = ethers.utils.parseUnits(formInput.price, 'ether');
-           console.log(tokenId);
-           //Contract MarketPlace
-           let market  = new ethers.Contract(nftMarketAddress, Market.abi, signer);
-           let listingPrice = await market.getListingPrice();
-           listingPrice = listingPrice.toString();
-           await market.createMarketItem(nftAddress, tokenId, price,
-               { value: listingPrice });
-               setTimeout(()=>{
-                   router.push('/');
-               },2000);
+          if(cid != ""){
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            //Contract NFT
+            let nft = new ethers.Contract(nftAddress, NFT.abi, signer);
+           //  console.log(cid);
+            let transaction = await nft.createToken(cid);
+            let tx = await transaction.wait();
+            let tokenId = tx.events[0].args[2].toNumber();
+            const price = ethers.utils.parseUnits(formInput.price, 'ether');
+            console.log(tokenId);
+            //Contract MarketPlace
+            console.log("wait a minute to continue the second transaction");
+            let market  = new ethers.Contract(nftMarketAddress, Market.abi, signer);
+            let listingPrice = await market.getListingPrice();
+            listingPrice = listingPrice.toString();
+            await market.createMarketItem(nftAddress, tokenId, price,
+                { value: listingPrice });
+                setTimeout(()=>{
+                    router.reload();
+                },2000);
+          }else{
+            console.log("Upload metadata failed");
+          }
        } catch (error) {
            console.log("Fail");
        }

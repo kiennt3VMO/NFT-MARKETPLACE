@@ -60,6 +60,7 @@ function detail() {
         };
       }));
       const soldItems = items.filter(i => i.itemId == idNumber);
+      
       // nft = soldItems[0];
       setNfts(soldItems);
       // console.log(items);
@@ -168,7 +169,7 @@ function detail() {
                 className=" 
              object-cover shadow-lg shadow-yellow-100
              rounded-lg mb-5"
-                src="https://gateway.pinata.cloud/ipfs/bafkreibwosm7qrrkzinrnrz67dljxui7d6eh7k7rue6vjsccuse5ack2r4"
+                src={nft.image}
                 alt="NFT"
               />
               <div className="flex flex-col">

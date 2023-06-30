@@ -24,7 +24,7 @@ function statics() {
 
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
-
+            const accounts = await provider.listAccounts();
             const marketContract = new ethers.Contract(nftMarketAddress, Market.abi, signer)
             const tokenContract = new ethers.Contract(nftAddress, NFT.abi, provider)
             const data = await marketContract.fetchItemsCreated()
@@ -55,17 +55,19 @@ function statics() {
             /* create a filtered array of items that have been sold */
             // console.log(items);
             const soldItems = items.filter(i => i.sold == true)
-            const saleItems = items.filter(i => i.sold == false)
-            console.log(items);
+            const saleItems = items.filter(i => i.owner !== accounts[0])
+            // console.log(items);
             setSold(soldItems)
+            // const saleItem = items.filter(i => i.owner != signer);
             setNfts(saleItems)
             setLoadingState('loaded')
+            console.log("Load Items");
         } catch (error) {
             console.log("Not connected to metamask");
         }
     }
     async function loadTrans() {
-        // try {
+        try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
 
@@ -93,10 +95,11 @@ function statics() {
             // console.log(items.length);
             setTrans(items);
             console.log("Load Transaction");
-        // } catch (error) {
-        //     console.log("Not load transaction");
-        // }
+        } catch (error) {
+            console.log("Not load transaction");
+        }
     }
+  
     return (
         <div
             className="w-4/5 
@@ -108,7 +111,7 @@ function statics() {
                 <h4
                     className="text-white text-3xl font-bold uppercase
     opacity-70" >
-                    NFT Created
+                    NFT Saled
                 </h4>
                 {/* NFT Section */}
                 {

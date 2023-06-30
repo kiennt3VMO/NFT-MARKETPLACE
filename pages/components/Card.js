@@ -1,9 +1,9 @@
 import Link from 'next/link'
 const Card = ({ nft }) => {
-  // console.log(nft.name);
+  // console.log(name);
   // console.log(nft.description);
   return (
-    <div className="w-full 
+    <div  className=" w-full 
           shadow-xl shadow-yellow-50
           rounded-md overflow-hidden
            my-2 p-3

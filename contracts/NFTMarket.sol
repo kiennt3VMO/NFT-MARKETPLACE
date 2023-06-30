@@ -73,7 +73,7 @@ contract NFTMarket is ReentrancyGuard {
     //     }
     //     return listingPrice;
     // }
-
+ bool public lastFunctionStatus;
     //Creat a item nft for market
     function createMarketItem(
         address nftContract,
@@ -135,10 +135,10 @@ contract NFTMarket is ReentrancyGuard {
         uint256 price
     ) public payable {
         // rePostTokenForSale
-        require(
-            idMarketItem[itemId].owner == msg.sender,
-            "Only item owner can perform this operation"
-        );
+        // require(
+        //     idMarketItem[itemId].owner == msg.sender,
+        //     "Only item owner can perform this operation"
+        // );
 
         require(msg.value == listingPrice, "Price must equal to listing price");
         idMarketItem[itemId].sold = false;
@@ -186,8 +186,8 @@ contract NFTMarket is ReentrancyGuard {
 
         //Owner of nft is the buyer
         idMarketItem[itemId].owner = payable(msg.sender);
-        idMarketItem[itemId].seller = payable(msg.sender);
-        idMarketItem[itemId].sold = false;
+        // idMarketItem[itemId].seller = payable(msg.sender);
+        // idMarketItem[itemId].sold = false;
 
         _itemSold.increment();
 
@@ -226,7 +226,7 @@ contract NFTMarket is ReentrancyGuard {
 
         //Owner of nft is the buyer
         idMarketItem[itemId].owner = payable(msg.sender);
-        idMarketItem[itemId].seller = payable(msg.sender);
+        // idMarketItem[itemId].seller = payable(msg.sender);
         idMarketItem[itemId].sold = true;
 
         _itemSold.increment();

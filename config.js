@@ -1,6 +1,6 @@
 export const logo = "https://img.freepik.com/free-vector/flat-design-nft-concept_52683-62388.jpg?w=826&t=st=1687401734~exp=1687402334~hmac=2c187031162789603de57149f6b76d6f6c01b02dabed240129d0ff305c9c81bb";
-export const nftAddress = "0xD4F4D76Fb735F5f33EFBD64A5816635757f28630"
-export const nftMarketAddress = "0x68Dc00A91155122484DE693684f5Efa599684c22"
+export const nftAddress = "0xecb4a6dFEA267BBd8fEd3FB6172289c41ccB6BE0"
+export const nftMarketAddress = "0xb947c3B03527B37f6510b3294890E940ffcf70f9"
 
 
 export const apikey = "7bfbd023be89f92aa223";

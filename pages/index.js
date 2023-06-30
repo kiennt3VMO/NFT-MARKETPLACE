@@ -19,10 +19,12 @@ const img1 =
 export default function Home() {
     const router = useRouter();
     const [nfts, setNfts] = useState([]);
+    const [transaction, setTrans] = useState([])
     const [signer, setSigner] = useState([]);
     const [loadingState, setLoadingState] = useState('not-loaded');
     useEffect(() => {
         loadNFTs();
+        loadTrans();
     }, [])
 
     async function loadNFTs() {
@@ -65,6 +67,7 @@ export default function Home() {
             }));
             setNfts(items);
             setLoadingState('loaded');
+            console.log("Load NFT");
 
         } catch (error) {
             console.log("Load failed , Server dropped");
@@ -72,6 +75,39 @@ export default function Home() {
         }
 
 
+    }
+    async function loadTrans() {
+        try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+
+            const marketContract = new ethers.Contract(nftMarketAddress, Market.abi, signer)
+            const data = await marketContract.fetchAllTransaction()
+
+            const items = await Promise.all(data.map(async i => {
+                const date = new Date(i.timestamp * 1000); // Để chuyển đổi timestamp từ giây thành mili-giây, nhân với 1000
+                    const currentDate = date.toISOString(); 
+                let cost = ethers.utils.formatUnits(i.cost.toString(), 'ether')
+                let item = {
+                    itemId : i.itemId.toNumber(),
+                    owner : i.owner,
+                    cost: cost,
+                    title: i.title,
+                    description: i.description,
+                    timestamp: currentDate,
+                }
+                return item;
+            }))
+            /* create a filtered array of items that have been sold */
+            // console.log(items);
+
+            console.log(items);
+            // console.log(items.length);
+            setTrans(items);
+            console.log("Load Transaction");
+        } catch (error) {
+            console.log("Not load transaction");
+        }
     }
     return (
 
@@ -219,16 +255,37 @@ export default function Home() {
                         Transaction
                     </h4>
 
-                    {/* <Transaction nft={1} />
-                    <Transaction nft={2} />
-                    <Transaction nft={2} /> */}
+                    {
+                     transaction.length > 0 ? (
+                        transaction.map((tran, i) => (
+                            <Transaction key={i} tran={tran} />
+                         ))
+                     ) : (
+                        <h6
+                        className="text-white text-2xl font-mono
+                        opacity-70 text-center"
+                    >
+                        No Transaction 
+                    </h6>
+                     )
+                   }
+                 {
+                        (loadingState === 'loaded' && !transaction.length) ? (
+                            <div className="text-center my-5 ">
+                                <button className="  text-white 
+       md:text-xs p-2 rounded-full">
 
-                    <div className="text-center my-5">
-                        <button className="shadow-xl shadow-blue-400 text-white 
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="text-center my-5 ">
+                                <button className="disabled shadow-xl shadow-blue-400 text-white 
       bg-[#44b8e6] hover:bg-[#258dd3] md:text-xs p-2 rounded-full">
-                            Load more
-                        </button>
-                    </div>
+                                    Load more
+                                </button>
+                            </div>
+                        )
+                    }
 
 
                 </div>
