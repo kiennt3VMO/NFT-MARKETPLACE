@@ -127,6 +127,9 @@ contract NFTMarket is ReentrancyGuard {
             block.timestamp
         );
     }
+    function getItemId( uint256 itemId)public view  returns (MarketItem memory) {
+        return idMarketItem[itemId];
+    }
 
     //When user want to resale token that buyed
     function reSellToken(
